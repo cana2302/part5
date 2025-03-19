@@ -6,10 +6,14 @@ import loginService from './services/login'
 const App = () => {
   const [blogs, setBlogs] = useState([])
   const [errorMessage, setErrorMessage] = useState(null)
+  const [newTitle, setNewTitle] = useState('')
+  const [newAuthor, setNewAuthor] = useState('')
+  const [newUrl, setNewUrl] = useState('')
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [user, setUser] = useState(null)
 
+  //check user localStorage
   useEffect(() => {
     const loggedUserJSON = window.localStorage.getItem('loggedBlogappUser')
     if (loggedUserJSON) {
@@ -19,6 +23,7 @@ const App = () => {
     }
   }, [])
 
+  //getAll blogs from backend
   useEffect(() => {
     blogService
     .getAll()
@@ -78,16 +83,62 @@ const App = () => {
     setUser(null)
   }
 
+  //create new blogs:
+
+  const handleTitleChange = (event) => {
+    setNewTitle(event.target.value)
+  }
+
+  const handleAuthorChange = (event) => {
+    setNewAuthor(event.target.value)
+  }
+
+  const handleUrlChange = (event) => {
+    setNewUrl(event.target.value)
+  }
+
+  const addBlog = (event) => {
+    event.preventDefault()
+    const blogObject = {
+      title: newTitle,
+      author: newAuthor,
+      url: newUrl
+    }
+
+    blogService
+      .create(blogObject)
+        .then(returnBlog => {
+          setBlogs(blogs.concat(returnBlog))
+          setNewTitle('')
+          setNewAuthor('')
+          setNewUrl('')
+        })
+  }
+
+  const blogForm = () => (
+    <div>
+      <h2>create new</h2>
+      <form onSubmit={addBlog}>
+        <p>title<input value={newTitle} onChange={handleTitleChange}/></p>
+        <p>author<input value={newAuthor} onChange={handleAuthorChange}/></p>
+        <p>url<input value={newUrl} onChange={handleUrlChange}/></p>
+        <button type="submit">create</button>
+      </form>
+    </div>  
+  )
+
   const bodyBlog = () => (
     <div>
       <h2>blogs</h2>
       <p>{user.name} logged in <button onClick={handleLogout}>logout</button> </p>
+      {blogForm()}
       {blogs.map(blog =>
         <Blog key={blog.id} blog={blog} />
       )}
     </div>     
   )
 
+  //render:
   if (user === null) {
     return (
       <div>
