@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react'
 import Blog from './components/Blog'
+import Notification from './components/Notification'
 import blogService from './services/blogs'
 import loginService from './services/login'
 
 const App = () => {
   const [blogs, setBlogs] = useState([])
-  const [errorMessage, setErrorMessage] = useState(null)
+  const [notification, setNotification] = useState(null)
+  const [message, setMessage] = useState(null)
   const [newTitle, setNewTitle] = useState('')
   const [newAuthor, setNewAuthor] = useState('')
   const [newUrl, setNewUrl] = useState('')
@@ -44,12 +46,20 @@ const App = () => {
       ) 
       blogService.setToken(user.token)
       setUser(user)
+      setNotification('authorization')
+      setMessage('success')
+      setTimeout(() => {
+        setMessage(null)
+        setNotification(null)
+      }, 5000)
       setUsername('')
       setPassword('')
     } catch (exception) {
-      setErrorMessage('wrong credentials')
+      setNotification('wrong username or password')
+      setMessage('error')
       setTimeout(() => {
-        setErrorMessage(null)
+        setMessage(null)
+        setNotification(null)
       }, 5000)
     }
   }
@@ -109,6 +119,12 @@ const App = () => {
       .create(blogObject)
         .then(returnBlog => {
           setBlogs(blogs.concat(returnBlog))
+          setNotification('a new blog '+ blogObject.title+' by '+ blogObject.author + ' added')
+          setMessage('success')
+          setTimeout(() => {
+            setMessage(null)
+            setNotification(null)
+          }, 5000)
           setNewTitle('')
           setNewAuthor('')
           setNewUrl('')
@@ -130,6 +146,7 @@ const App = () => {
   const bodyBlog = () => (
     <div>
       <h2>blogs</h2>
+      <Notification message={message} notification={notification} />
       <p>{user.name} logged in <button onClick={handleLogout}>logout</button> </p>
       {blogForm()}
       {blogs.map(blog =>
@@ -143,6 +160,7 @@ const App = () => {
     return (
       <div>
       <h2>Log in to application</h2>
+      <Notification message={message} notification={notification} />
       {loginForm()}
     </div>
     )
