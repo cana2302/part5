@@ -1,8 +1,9 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Blog from './components/Blog'
 import Notification from './components/Notification'
 import blogService from './services/blogs'
 import loginService from './services/login'
+import Togglable from './components/Togglable'
 
 const App = () => {
   const [blogs, setBlogs] = useState([])
@@ -14,6 +15,8 @@ const App = () => {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [user, setUser] = useState(null)
+
+  const blogFormRef = useRef()
 
   //check user localStorage
   useEffect(() => {
@@ -125,6 +128,7 @@ const App = () => {
             setMessage(null)
             setNotification(null)
           }, 5000)
+          blogFormRef.current.toggleVisibility()
           setNewTitle('')
           setNewAuthor('')
           setNewUrl('')
@@ -132,15 +136,17 @@ const App = () => {
   }
 
   const blogForm = () => (
-    <div>
-      <h2>create new</h2>
-      <form onSubmit={addBlog}>
-        <p>title<input value={newTitle} onChange={handleTitleChange}/></p>
-        <p>author<input value={newAuthor} onChange={handleAuthorChange}/></p>
-        <p>url<input value={newUrl} onChange={handleUrlChange}/></p>
-        <button type="submit">create</button>
-      </form>
-    </div>  
+    <Togglable buttonLabel='new blog' ref={blogFormRef} >
+      <div>
+        <h2>create new</h2>
+        <form onSubmit={addBlog}>
+          <p>title<input value={newTitle} onChange={handleTitleChange}/></p>
+          <p>author<input value={newAuthor} onChange={handleAuthorChange}/></p>
+          <p>url<input value={newUrl} onChange={handleUrlChange}/></p>
+          <button type="submit">create</button>
+        </form>
+      </div> 
+    </Togglable> 
   )
 
   const bodyBlog = () => (
